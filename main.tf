@@ -22,13 +22,11 @@ provider "azurerm" {
   subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"
 }
 
-# ---------- RESOURCE GROUP ----------
 resource "azurerm_resource_group" "dotstat_rg" {
   name     = var.resource_group_name
   location = var.location
 }
 
-# ---------- NETWORK CONFIG ----------
 resource "azurerm_virtual_network" "dotstat_vnet" {
   name                = "dotstat-vnet"
   address_space       = ["10.0.0.0/16"]
@@ -111,7 +109,6 @@ resource "azurerm_network_interface_security_group_association" "dotstat_nsg_ass
   network_security_group_id = azurerm_network_security_group.dotstat_nsg.id
 }
 
-# ---------- LINUX VIRTUAL MACHINE ----------
 resource "azurerm_linux_virtual_machine" "dotstat_vm" {
   name                = var.vm_name
   resource_group_name = azurerm_resource_group.dotstat_rg.name

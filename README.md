@@ -3,6 +3,7 @@
 This package automatically creates and configures an **Azure Ubuntu VM** with:
 - Remote Desktop (xRDP + Xfce)
 - Docker + Docker Compose
+- Firefox preinstalled
 - Cloned `.Stat Suite` demo environment
 - Auto-started containers
 
@@ -10,32 +11,60 @@ This package automatically creates and configures an **Azure Ubuntu VM** with:
 
 ## 🧰 Prerequisites (Windows Machine)
 
-### 1️⃣ Terraform
-You already have `terraform.exe` included in this repo.
+### 1️⃣ Azure CLI
 
-### 2️⃣ Install Azure CLI
-Run these commands in **PowerShell** (as Administrator):
+Azure CLI is required to authenticate with Azure.  
+You need administrator rights to install it.
 
-```powershell
-Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi
-Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'
-az version
+#### ⚙️ Steps
+1. Download manually:
+   👉 [https://aka.ms/installazurecliwindows](https://aka.ms/installazurecliwindows)
+2. Save the file (e.g., `AzureCLI.msi`)
+3. Double-click to install Azure CLI.
+4. After installation, open **PowerShell** and verify:
+   ```powershell
+   az version
+   ```
+
+---
+
+### 2️⃣ Terraform
+
+Terraform must be downloaded manually.  
+Download from:
+👉 [https://developer.hashicorp.com/terraform/downloads](https://developer.hashicorp.com/terraform/downloads)
+
+Unzip `terraform.exe` and place it in **the same folder** as the Terraform files:
+```
+main.tf
+variables.tf
+outputs.tf
+cloud-init.yaml
 ```
 
+Verify installation:
+```powershell
+.	erraform.exe -version
+```
+
+---
+
 ### 3️⃣ Login to Azure
+
 ```powershell
 az login
 ```
 
-A browser window will open — sign in with your Azure credentials.
+A browser window will open. Sign in with your Azure credentials (MFA supported).
 
-### 4️⃣ Find your subscription ID
+---
+
+### 4️⃣ Find Your Subscription ID
+
 ```powershell
 az account list --output table
 ```
-Copy the `SubscriptionId` you want to use.
-
-Then edit **main.tf** and paste it here:
+Copy your **SubscriptionId** and update **main.tf**:
 ```hcl
 subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"
 ```
@@ -44,21 +73,18 @@ subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"
 
 ## ⚙️ Deploy the Environment
 
-1. Open PowerShell or CMD in this folder.
-
+1. Open PowerShell in the folder containing `terraform.exe`
 2. Initialize Terraform:
-```powershell
-terraform init
-```
-
+   ```powershell
+   .\terraform.exe init
+   ```
 3. Apply the configuration:
-```powershell
-terraform apply -auto-approve
-```
+   ```powershell
+   .\terraform.exe apply -auto-approve
+   ```
 
-⏱️ Wait about **10–15 minutes** for Azure to create and configure the VM.
-
-When complete, Terraform will output your public IP address:
+⏱️ Wait about **10–15 minutes** for Azure to finish setup.  
+Afterwards, Terraform displays your VM public IP:
 ```
 Outputs:
 
@@ -71,16 +97,16 @@ vm_public_ip = "4.205.212.9"
 
 ### SSH
 ```powershell
-ssh jalal@<public-ip>
+ssh dotstatuser@<public-ip>
 ```
 
 ### Remote Desktop (RDP)
-- Open **Remote Desktop Connection (mstsc.exe)**
-- Enter the public IP (from Terraform output)
-- Username: `jalal`
+- Launch **Remote Desktop Connection (mstsc.exe)**
+- Enter your public IP  
+- Username: `dotstatuser`  
 - Password: `ChangeMe123!`
 
-Once logged in, open a terminal inside Ubuntu and test:
+In Ubuntu desktop, open Terminal and test:
 ```bash
 docker ps
 firefox &
@@ -90,14 +116,13 @@ firefox &
 
 ## 🧾 Destroy the Environment
 
-When you’re done testing:
+To delete all created Azure resources:
 ```powershell
-terraform destroy -auto-approve
+.	erraform.exe destroy -auto-approve
 ```
-
-This will delete all Azure resources created by Terraform.
 
 ---
 
 **Author:** Amarof Jalal  
-**Version:** November 2025
+**Version:** November 2025  
+**Environment:** Terraform + Azure CLI (Windows)
