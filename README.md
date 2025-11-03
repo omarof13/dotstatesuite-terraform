@@ -44,7 +44,7 @@ cloud-init.yaml
 
 Verify installation:
 ```powershell
-.	erraform.exe -version
+terraform.exe -version
 ```
 
 ---
