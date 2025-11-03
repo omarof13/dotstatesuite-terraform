@@ -9,82 +9,88 @@ This package automatically creates and configures an **Azure Ubuntu VM** with:
 
 ---
 
-## 🧰 Prerequisites (Windows Machine)
+## 🌩️ Deploy Using Azure Portal Cloud Shell (Recommended)
 
-### 1️⃣ Azure CLI
-
-Azure CLI is required to authenticate with Azure.  
-You need administrator rights to install it.
-
-#### ⚙️ Steps
-1. Download manually:
-   👉 [https://aka.ms/installazurecliwindows](https://aka.ms/installazurecliwindows)
-2. Save the file (e.g., `AzureCLI.msi`)
-3. Double-click to install Azure CLI.
-4. After installation, open **PowerShell** and verify:
-   ```powershell
-   az version
-   ```
+Azure Cloud Shell is a browser-based environment **already pre-installed with Terraform, Azure CLI, and Git**.  
+No installation or setup is required — just your Azure account.
 
 ---
 
-### 2️⃣ Terraform
+### ⚙️ Steps
 
-Terraform must be downloaded manually.  
-Download from:
-👉 [https://developer.hashicorp.com/terraform/downloads](https://developer.hashicorp.com/terraform/downloads)
+1. Go to the **Azure Portal**:  
+   👉 [https://portal.azure.com](https://portal.azure.com)
 
-Unzip `terraform.exe` and place it in **the same folder** as the Terraform files:
-```
-main.tf
-variables.tf
-outputs.tf
-cloud-init.yaml
-```
+2. Click the **Cloud Shell** icon at the top-right corner (looks like `>_`).
 
-Verify installation:
-```powershell
-terraform.exe -version
+3. When prompted, select **Bash**.
+
+4. The first time, Azure will ask to create a **storage account**.  
+   Click **Create storage** and wait until Cloud Shell is ready.
+
+---
+
+### 📦 Clone the Repository
+
+```bash
+git clone https://github.com/omarof13/dotstatesuite-terraform.git
+cd dotstatesuite-terraform
 ```
 
 ---
 
-### 3️⃣ Login to Azure
+### 🧾 Check and Select Your Azure Subscription
 
-```powershell
-az login
-```
-
-A browser window will open. Sign in with your Azure credentials (MFA supported).
-
----
-
-### 4️⃣ Find Your Subscription ID
-
-```powershell
+List all your subscriptions:
+```bash
 az account list --output table
 ```
-Copy your **SubscriptionId** and update **main.tf**:
+
+Check which one is currently active:
+```bash
+az account show --output table
+```
+
+If needed, switch to another subscription:
+```bash
+az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+```
+
+---
+
+### 🛠️ Edit Your Terraform Configuration
+
+Open `main.tf` to insert your Subscription ID:
+```bash
+code main.tf
+```
+
+Find this line:
 ```hcl
 subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"
 ```
 
+Replace it with your actual Subscription ID.
+
+Save the file (Ctrl + S) and close the editor.
+
 ---
 
-## ⚙️ Deploy the Environment
+### 🚀 Deploy the Environment
 
-1. Open PowerShell in the folder containing `terraform.exe`
-2. Initialize Terraform:
-   ```powershell
-   .\terraform.exe init
-   ```
-3. Apply the configuration:
-   ```powershell
-   .\terraform.exe apply -auto-approve
-   ```
+Initialize Terraform:
+```bash
+terraform init
+```
 
-⏱️ Wait about **10–15 minutes** for Azure to finish setup.  
-Afterwards, Terraform displays your VM public IP:
+Apply the configuration:
+```bash
+terraform apply -auto-approve
+```
+
+⏱️ Wait around **10–15 minutes** for the VM to be created and configured.  
+When finished, Terraform will display:
+
 ```
 Outputs:
 
@@ -93,20 +99,21 @@ vm_public_ip = "4.205.212.9"
 
 ---
 
-## 🌐 Access the VM from OZ
+### 🌐 Access the VM
 
-### SSH
-```powershell
+#### 🔹 SSH
+```bash
 ssh dotstatuser@<public-ip>
 ```
 
-### Remote Desktop (RDP)
-- Launch **Remote Desktop Connection (mstsc.exe)**
-- Enter your public IP  
-- Username: `dotstatuser`  
-- Password: `ChangeMe123!`
+#### 🔹 Remote Desktop (RDP)
+1. Open **Remote Desktop Connection (mstsc.exe)** on your computer  
+2. Enter the VM’s public IP  
+3. Credentials:  
+   - **Username:** `dotstatuser`  
+   - **Password:** `ChangeMe123!`
 
-In Ubuntu desktop, open Terminal and test:
+Inside Ubuntu, you can verify services:
 ```bash
 docker ps
 firefox &
@@ -114,15 +121,16 @@ firefox &
 
 ---
 
-## 🧾 Destroy the Environment
+### 🧹 Destroy the Environment
 
-To delete all created Azure resources:
-```powershell
-terraform.exe destroy -auto-approve
+When you’re done, clean up all Azure resources:
+```bash
+terraform destroy -auto-approve
 ```
 
 ---
 
+**Repository:** [github.com/omarof13/dotstatesuite-terraform](https://github.com/omarof13/dotstatesuite-terraform)  
 **Author:** Amarof Jalal  
 **Version:** November 2025  
-**Environment:** Terraform + Azure CLI (Windows)
+**Environment:** Azure Cloud Shell + Terraform  
