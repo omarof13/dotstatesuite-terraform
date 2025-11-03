@@ -4,26 +4,59 @@ package_upgrade: true
 
 runcmd:
   - apt update
-  - apt install -y xfce4 xfce4-goodies xrdp firefox
+  - apt install -y xfce4 xfce4-goodies xrdp firefox git ca-certificates curl gnupg lsb-release
   - echo xfce4-session > /home/dotstatuser/.xsession
   - systemctl enable xrdp
   - systemctl start xrdp
-  - apt install -y ca-certificates curl gnupg lsb-release git
+
+  # Install Docker
   - mkdir -p /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
   - apt update
   - apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+  # Configure user + permissions
   - usermod -aG docker dotstatuser
   - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
   - loginctl enable-linger dotstatuser
+
+  # Start Docker
   - systemctl enable docker
-  - systemctl start docker  
+  - systemctl start docker
+
+  # Add Docker internal host resolution
   - echo "127.0.0.1 host.docker.internal" >> /etc/hosts
   - echo "DOCKER_OPTS='--add-host=host.docker.internal:host-gateway'" > /etc/default/docker
   - systemctl daemon-reload
   - systemctl restart docker
+
+  # Clone .Stat Suite repository
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
-  - su - dotstatuser -c "cd ~/dotstatesuite && find . -type f -name '*.sh' -exec chmod +x {} \\;"
-  - su - dotstatuser -c "cd ~/dotstatesuite/demo && ./start.sh"
+  - su - dotstatuser -c "cd ~/dotstatsuite && find . -type f -name '*.sh' -exec chmod +x {} \\;"
+
+  # Create systemd service for persistent auto-start
+  - |
+    cat << 'EOF' > /etc/systemd/system/dotstatsuite.service
+    [Unit]
+    Description=DotStat Suite Auto Startup Service
+    After=network.target docker.service
+    Requires=docker.service
+
+    [Service]
+    Type=simple
+    User=dotstatuser
+    WorkingDirectory=/home/dotstatuser/dotstatesuite/demo
+    ExecStart=/bin/bash -c '/home/dotstatuser/dotstatsuite/demo/start.sh >> /var/log/dotstatsuite.log 2>&1'
+    Restart=on-failure
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+
+  # Enable service (will start automatically after reboot)
+  - systemctl daemon-reload
+  - systemctl enable dotstatsuite.service
+
+  # Final reboot (ensures docker group + service autostart apply)
   - reboot
