@@ -118,7 +118,7 @@ firefox &
 
 To delete all created Azure resources:
 ```powershell
-.	erraform.exe destroy -auto-approve
+terraform.exe destroy -auto-approve
 ```
 
 ---
