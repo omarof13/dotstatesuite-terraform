@@ -93,7 +93,7 @@ vm_public_ip = "4.205.212.9"
 
 ---
 
-## 🌐 Access the VM
+## 🌐 Access the VM from OZ
 
 ### SSH
 ```powershell
