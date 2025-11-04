@@ -33,8 +33,8 @@ runcmd:
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
   
   # Fix permissions for all shell scripts recursively
-  - find /home/dotstatuser/dotstatsuite -type f -name "*.sh" -exec chmod +x {} +
-  - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatsuite
+  - find /home/dotstatuser/dotstatesuite -type f -name "*.sh" -exec chmod +x {} +
+  - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatesuite
 
   # Do NOT create a systemd service; the user will start the demo script manually
-  - echo 'Systemd service creation skipped. Start /home/dotstatuser/dotstatsuite/demo/start.sh manually as dotstatuser when needed.' > /var/log/dotstatsuite-setup.log
+  - echo 'Systemd service creation skipped. Start /home/dotstatuser/dotstatesuite/demo/start.sh manually as dotstatuser when needed.' > /var/log/dotstatsuite-setup.log

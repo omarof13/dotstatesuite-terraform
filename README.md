@@ -109,12 +109,7 @@ ssh dotstatuser@<public-ip>
 
 To start the .Stat Suite demo, run the following command as the dotstatuser:
 ```bash
-~/dotstatsuite/demo/start.sh
-```
-
-**Note:** If you get a "Permission denied" error, make the script executable first:
-```bash
-chmod +x ~/dotstatsuite/demo/start.sh
+~/dotstatesuite/demo/start.sh
 ```
 
 #### 🔹 Remote Desktop (RDP)
