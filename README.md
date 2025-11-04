@@ -97,6 +97,8 @@ Outputs:
 vm_public_ip = "4.205.212.9"
 ```
 
+📝 **Note:** The VM uses **cloud-init** for automatic setup. Please wait a few minutes after deployment before the machine will be available for RDP, as cloud-init needs time to install and configure all the required software (Docker, xRDP, etc.).
+
 ---
 
 ### 🌐 Access the VM
@@ -104,6 +106,11 @@ vm_public_ip = "4.205.212.9"
 #### 🔹 SSH
 ```bash
 ssh dotstatuser@<public-ip>
+```
+
+To start the .Stat Suite demo, run the following command as the dotstatuser:
+```bash
+~/dotstatsuite/demo/start.sh
 ```
 
 #### 🔹 Remote Desktop (RDP)
