@@ -62,7 +62,7 @@ az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
 
 Open `main.tf` to insert your Subscription ID:
 ```bash
-code main.tf
+nano main.tf
 ```
 
 Find this line:
@@ -72,7 +72,7 @@ subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"
 
 Replace it with your actual Subscription ID.
 
-Save the file (Ctrl + S) and close the editor.
+Save the file (Ctrl + O, then Enter) and exit (Ctrl + X).
 
 ---
 
