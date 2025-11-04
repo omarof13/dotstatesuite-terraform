@@ -88,8 +88,7 @@ Apply the configuration:
 terraform apply -auto-approve
 ```
 
-⏱️ Wait around **10–15 minutes** for the VM to be created and configured.  
-When finished, Terraform will display:
+Terraform will display:
 
 ```
 Outputs:
@@ -97,7 +96,7 @@ Outputs:
 vm_public_ip = "4.205.212.9"
 ```
 
-📝 **Note:** The VM uses **cloud-init** for automatic setup. Please wait a few minutes after deployment before the machine will be available for RDP, as cloud-init needs time to install and configure all the required software (Docker, xRDP, etc.).
+📝 **Note:** The VM uses **cloud-init** for automatic setup. After Terraform completes, please wait approximately **5 minutes** for cloud-init to finish configuring the machine before it will be available for RDP.
 
 ---
 
