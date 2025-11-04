@@ -29,13 +29,11 @@ runcmd:
   - echo "DOCKER_OPTS='--add-host=host.docker.internal:host-gateway'" > /etc/default/docker
   - systemctl daemon-reload
   - systemctl restart docker
-
   # Clone .Stat Suite repository
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
   
-  # Fix permissions for all shell scripts
-  - chmod +x /home/dotstatuser/dotstatsuite/demo/start.sh
-  - find /home/dotstatuser/dotstatsuite -type f -name "*.sh" -exec chmod +x {} \;
+  # Fix permissions for all shell scripts recursively
+  - find /home/dotstatuser/dotstatsuite -type f -name "*.sh" -exec chmod +x {} +
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatsuite
 
   # Do NOT create a systemd service; the user will start the demo script manually
