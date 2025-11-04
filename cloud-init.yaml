@@ -35,28 +35,5 @@ runcmd:
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
   - su - dotstatuser -c "cd ~/dotstatsuite && find . -type f -name '*.sh' -exec chmod +x {} \\;"
 
-  # Create systemd service for persistent auto-start
-  - |
-    cat << 'EOF' > /etc/systemd/system/dotstatsuite.service
-    [Unit]
-    Description=DotStat Suite Auto Startup Service
-    After=network.target docker.service
-    Requires=docker.service
-
-    [Service]
-    Type=simple
-    User=dotstatuser
-    WorkingDirectory=/home/dotstatuser/dotstatesuite/demo
-    ExecStart=/bin/bash -c '/home/dotstatuser/dotstatsuite/demo/start.sh >> /var/log/dotstatsuite.log 2>&1'
-    Restart=on-failure
-
-    [Install]
-    WantedBy=multi-user.target
-    EOF
-
-  # Enable service (will start automatically after reboot)
-  - systemctl daemon-reload
-  - systemctl enable dotstatsuite.service
-
-  # Final reboot (ensures docker group + service autostart apply)
-  - reboot
+  # Do NOT create a systemd service; the user will start the demo script manually
+  - echo 'Systemd service creation skipped. Start /home/dotstatuser/dotstatsuite/demo/start.sh manually as dotstatuser when needed.' > /var/log/dotstatsuite-setup.log
