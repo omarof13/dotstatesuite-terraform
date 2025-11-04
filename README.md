@@ -112,6 +112,11 @@ To start the .Stat Suite demo, run the following command as the dotstatuser:
 ~/dotstatsuite/demo/start.sh
 ```
 
+**Note:** If you get a "Permission denied" error, make the script executable first:
+```bash
+chmod +x ~/dotstatsuite/demo/start.sh
+```
+
 #### 🔹 Remote Desktop (RDP)
 1. Open **Remote Desktop Connection (mstsc.exe)** on your computer  
 2. Enter the VM’s public IP  

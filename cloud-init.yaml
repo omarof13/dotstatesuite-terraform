@@ -30,10 +30,9 @@ runcmd:
   - echo "DOCKER_OPTS='--add-host=host.docker.internal:host-gateway'" > /etc/default/docker
   - systemctl daemon-reload
   - systemctl restart docker
-
   # Clone .Stat Suite repository
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
-  - su - dotstatuser -c "cd ~/dotstatsuite && find . -type f -name '*.sh' -exec chmod +x {} \\;"
+  - su - dotstatuser -c "find ~/dotstatsuite -type f -name '*.sh' -exec chmod +x {} \;"
 
   # Do NOT create a systemd service; the user will start the demo script manually
   - echo 'Systemd service creation skipped. Start /home/dotstatuser/dotstatsuite/demo/start.sh manually as dotstatuser when needed.' > /var/log/dotstatsuite-setup.log
