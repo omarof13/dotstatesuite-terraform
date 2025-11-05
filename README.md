@@ -112,7 +112,7 @@ To start the .Stat Suite demo, run the following command as the dotstatuser:
 ~/dotstatesuite/demo/start.sh
 ```
 
-#### 🔹 Remote Desktop (RDP) (from OZ)
+#### 🔹 Remote Desktop (RDP)
 1. Open **Remote Desktop Connection (mstsc.exe)** on your computer  
 2. Enter the VM’s public IP  
 3. Credentials:  
