@@ -18,7 +18,7 @@ No installation or setup is required — just your Azure account.
 
 ### ⚙️ Steps
 
-1. Go to the **Azure Portal**:  
+1. Go to the **Azure Portal** from AVD:  
    👉 [https://portal.azure.com](https://portal.azure.com)
 
 2. Click the **Cloud Shell** icon at the top-right corner (looks like `>_`).
@@ -100,7 +100,7 @@ vm_public_ip = "4.205.212.9"
 
 ---
 
-### 🌐 Access the VM
+### 🌐 Access the VM (from OZ)
 
 #### 🔹 SSH
 ```bash
@@ -112,7 +112,7 @@ To start the .Stat Suite demo, run the following command as the dotstatuser:
 ~/dotstatesuite/demo/start.sh
 ```
 
-#### 🔹 Remote Desktop (RDP)
+#### 🔹 Remote Desktop (RDP) (from OZ)
 1. Open **Remote Desktop Connection (mstsc.exe)** on your computer  
 2. Enter the VM’s public IP  
 3. Credentials:  
