@@ -3,19 +3,16 @@ package_update: true
 package_upgrade: true
 
 runcmd:
+  # Base environment + XRDP + desktop
   - apt update
   - apt install -y xfce4 xfce4-goodies xrdp firefox git ca-certificates curl gnupg lsb-release
   - echo xfce4-session > /home/dotstatuser/.xsession
   - systemctl enable xrdp
   - systemctl start xrdp
-  # Install Docker
-  - mkdir -p /etc/apt/keyrings
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-  - apt update
-  - apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-  # Start Docker first
+  # Install Docker Desktop
+  - curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb?utm_source=docker&utm_medium=webreferral&utm_campaign=docs-driven-download-linux-amd64" -o /tmp/docker-desktop-amd64.deb
+  - apt install -y /tmp/docker-desktop-amd64.deb
   - systemctl enable docker
   - systemctl start docker
 
@@ -24,11 +21,15 @@ runcmd:
   - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
   - loginctl enable-linger dotstatuser
 
-  # Add Docker internal host resolution
-  - echo "127.0.0.1 host.docker.internal" >> /etc/hosts
-  - echo "DOCKER_OPTS='--add-host=host.docker.internal:host-gateway'" > /etc/default/docker
-  - systemctl daemon-reload
-  - systemctl restart docker
+  # Auto-start Docker Desktop for the user session
+  - mkdir -p /home/dotstatuser/.config/autostart
+  - echo "[Desktop Entry]" > /home/dotstatuser/.config/autostart/docker-desktop.desktop
+  - echo "Type=Application" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
+  - echo "Name=Docker Desktop" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
+  - echo "Exec=/usr/bin/com.docker.desktop" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
+  - echo "X-GNOME-Autostart-enabled=true" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
+  - chown -R dotstatuser:dotstatuser /home/dotstatuser/.config
+
   # Clone .Stat Suite repository
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
   
