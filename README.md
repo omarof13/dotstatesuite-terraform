@@ -2,10 +2,10 @@
 
 This package automatically creates and configures an **Azure Ubuntu VM** with:
 - Remote Desktop (xRDP + Xfce)
-- Docker + Docker Compose
+- Docker Engine + Docker Desktop GUI
 - Firefox preinstalled
 - Cloned `.Stat Suite` demo environment
-- Auto-started containers
+- Ready-to-run containers and tools
 
 ---
 
@@ -18,7 +18,7 @@ No installation or setup is required — just your Azure account.
 
 ### ⚙️ Steps
 
-1. Go to the **Azure Portal** from AVD:  
+1. Go to the **Azure Portal**:  
    👉 [https://portal.azure.com](https://portal.azure.com)
 
 2. Click the **Cloud Shell** icon at the top-right corner (looks like `>_`).
@@ -72,7 +72,7 @@ subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"
 
 Replace it with your actual Subscription ID.
 
-Save the file (Ctrl + O, then Enter) and exit (Ctrl + X).
+Save the file (`Ctrl + O`, then `Enter`) and exit (`Ctrl + X`).
 
 ---
 
@@ -88,7 +88,7 @@ Apply the configuration:
 terraform apply -auto-approve
 ```
 
-Terraform will display:
+Terraform will display something like:
 
 ```
 Outputs:
@@ -96,38 +96,70 @@ Outputs:
 vm_public_ip = "4.205.212.9"
 ```
 
-📝 **Note:** The VM uses **cloud-init** for automatic setup. After Terraform completes, please wait approximately **5 minutes** for cloud-init to finish configuring the machine before it will be available for RDP.
+📝 **Note:**  
+The VM uses **cloud-init** for automatic setup.  
+After Terraform completes, please wait approximately **5 minutes** for the system to finish configuration before connecting via RDP.
 
 ---
 
-### 🌐 Access the VM (from OZ)
+## 🌐 Access the VM
 
-#### 🔹 SSH
-```bash
-ssh dotstatuser@<public-ip>
-```
+### 🔹 Remote Desktop (RDP)
 
-To start the .Stat Suite demo, run the following command as the dotstatuser:
-```bash
-~/dotstatesuite/demo/start.sh
-```
-
-#### 🔹 Remote Desktop (RDP)
 1. Open **Remote Desktop Connection (mstsc.exe)** on your computer  
 2. Enter the VM’s public IP  
 3. Credentials:  
    - **Username:** `dotstatuser`  
    - **Password:** `ChangeMe123!`
 
-Inside Ubuntu, you can verify services:
-```bash
-docker ps
-firefox &
-```
+Inside the XFCE desktop environment, you’ll find:
+- A **Docker Desktop** shortcut on the Desktop  
+- **Firefox** for browsing  
+- **Terminal** ready for Docker and Git commands
 
 ---
 
-### 🧹 Destroy the Environment
+## 🐳 Starting Docker Desktop GUI
+
+Once logged in via RDP, run the following command in the terminal (or double-click the desktop shortcut):
+
+```bash
+systemctl --user start docker-desktop
+```
+
+After a few seconds, the **Docker Desktop whale icon** will appear in the XFCE taskbar.  
+You can then manage containers from the Docker Desktop GUI or through the CLI.
+
+---
+
+## 📊 Running the .Stat Suite Demo
+
+Navigate to the cloned demo directory:
+
+```bash
+cd ~/dotstatesuite/demo
+./start.sh
+```
+
+This command starts all required services and initializes the local `.Stat Suite` demo environment.
+
+---
+
+### 🧩 First-Time Initialization
+
+After the initial startup completes, enter the **SFS (Structure File Store)** container to initialize the schema index:
+
+```bash
+docker exec -it sfs bash
+yarn dist:schema
+exit
+```
+
+Once done, your environment is fully ready for use!
+
+---
+
+## 🧹 Destroy the Environment
 
 When you’re done, clean up all Azure resources:
 ```bash
@@ -139,4 +171,4 @@ terraform destroy -auto-approve
 **Repository:** [github.com/omarof13/dotstatesuite-terraform](https://github.com/omarof13/dotstatesuite-terraform)  
 **Author:** Amarof Jalal  
 **Version:** November 2025  
-**Environment:** Azure Cloud Shell + Terraform  
+**Environment:** Azure Cloud Shell + Terraform
