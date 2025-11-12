@@ -15,22 +15,22 @@ runcmd:
   - systemctl start xrdp
 
   # ---------------------------------------------------------
-  # Install Docker Engine + Docker Desktop (GUI version)
+  # Install Docker Engine + Docker Desktop (non-interactive)
   # ---------------------------------------------------------
-  # Add Docker official repository and key
+  # Add official Docker repository and GPG key (new Ubuntu keyring format)
   - sudo mkdir -p /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   - sudo chmod a+r /etc/apt/keyrings/docker.gpg
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   - sudo apt update
+
+  # Install Docker Engine components first
   - sudo apt install -yq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  # GUI dependencies
-  - sudo apt install -y libgtk-3-0 libnotify4 libnss3 libxss1 libxtst6 xdg-utils gvfs fuse-overlayfs qemu-system-x86 qemu-utils
-  # Download and unpack Docker Desktop GUI bundle
-  - sudo curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-4.50.0-amd64.tar.gz" -o /tmp/docker-desktop.tar.gz
-  - sudo mkdir -p /opt/docker-desktop
-  - sudo tar -xzf /tmp/docker-desktop.tar.gz -C /opt/docker-desktop --strip-components=1
-  - sudo ln -sf /opt/docker-desktop/bin/com.docker.desktop /usr/bin/com.docker.desktop
+
+  # Download and install Docker Desktop
+  - sudo curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb" -o /tmp/docker-desktop-amd64.deb
+  - export DEBIAN_FRONTEND=noninteractive
+  - sudo apt -yq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" /tmp/docker-desktop-amd64.deb || sudo apt --fix-broken install -yq
   - systemctl enable docker
   - systemctl start docker
 
@@ -42,28 +42,15 @@ runcmd:
   - loginctl enable-linger dotstatuser
 
   # ---------------------------------------------------------
-  # Create Desktop shortcut to start Docker Desktop manually
-  # ---------------------------------------------------------
-  - mkdir -p /home/dotstatuser/Desktop
-  - echo "[Desktop Entry]" > /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Type=Application" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Name=Docker Desktop" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Comment=Launch Docker Desktop GUI" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Exec=dbus-launch systemctl --user start docker-desktop" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Icon=docker" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Terminal=false" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Categories=Utility;" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - chmod +x /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - chown -R dotstatuser:dotstatuser /home/dotstatuser/Desktop
-
-  # ---------------------------------------------------------
   # Clone .Stat Suite repository
   # ---------------------------------------------------------
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
+
+  # Fix permissions for all shell scripts recursively
   - find /home/dotstatuser/dotstatesuite -type f -name "*.sh" -exec chmod +x {} +
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatesuite
 
   # ---------------------------------------------------------
-  # Final note
+  # Final note for user
   # ---------------------------------------------------------
   - echo 'Systemd service creation skipped. Start /home/dotstatuser/dotstatesuite/demo/start.sh manually as dotstatuser when needed.' > /var/log/dotstatsuite-setup.log
