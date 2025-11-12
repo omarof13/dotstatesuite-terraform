@@ -7,12 +7,15 @@ runcmd:
   - apt update
   - apt install -y xfce4 xfce4-goodies xrdp firefox git ca-certificates curl gnupg lsb-release
   - echo xfce4-session > /home/dotstatuser/.xsession
+  - chown dotstatuser:dotstatuser /home/dotstatuser/.xsession
+  - chmod +x /home/dotstatuser/.xsession
   - systemctl enable xrdp
   - systemctl start xrdp
 
-  # Install Docker Desktop
-  - curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb?utm_source=docker&utm_medium=webreferral&utm_campaign=docs-driven-download-linux-amd64" -o /tmp/docker-desktop-amd64.deb
-  - apt install -y /tmp/docker-desktop-amd64.deb
+  # Install Docker Desktop (non-interactive)
+  - sudo curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb" -o /tmp/docker-desktop-amd64.deb
+  - export DEBIAN_FRONTEND=noninteractive
+  - sudo apt -yq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" /tmp/docker-desktop-amd64.deb || sudo apt --fix-broken install -yq
   - systemctl enable docker
   - systemctl start docker
 
@@ -21,18 +24,20 @@ runcmd:
   - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
   - loginctl enable-linger dotstatuser
 
-  # Auto-start Docker Desktop for the user session
+  # Auto-start Docker Desktop for the XFCE4 session
   - mkdir -p /home/dotstatuser/.config/autostart
   - echo "[Desktop Entry]" > /home/dotstatuser/.config/autostart/docker-desktop.desktop
   - echo "Type=Application" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
   - echo "Name=Docker Desktop" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
-  - echo "Exec=/usr/bin/com.docker.desktop" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
+  - echo "Exec=/opt/docker-desktop/bin/com.docker.desktop" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
   - echo "X-GNOME-Autostart-enabled=true" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
+  - echo "X-XFCE-Autostart-enabled=true" >> /home/dotstatuser/.config/autostart/docker-desktop.desktop
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/.config
+  - chmod +x /home/dotstatuser/.config/autostart/docker-desktop.desktop
 
   # Clone .Stat Suite repository
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
-  
+
   # Fix permissions for all shell scripts recursively
   - find /home/dotstatuser/dotstatesuite -type f -name "*.sh" -exec chmod +x {} +
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatesuite
