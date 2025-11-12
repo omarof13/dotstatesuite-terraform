@@ -35,9 +35,9 @@ runcmd:
   - systemctl start docker
 
   # ---------------------------------------------------------
-  # Configure user permissions
+  # Configure user permissions (Docker + KVM)
   # ---------------------------------------------------------
-  - usermod -aG docker dotstatuser
+  - usermod -aG docker,kvm dotstatuser
   - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
   - loginctl enable-linger dotstatuser
 
