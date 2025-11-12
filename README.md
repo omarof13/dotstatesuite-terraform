@@ -121,7 +121,7 @@ Inside the XFCE desktop environment, you’ll find:
 
 ## 🐳 Starting Docker Desktop GUI
 
-Once logged in via RDP, run the following command in the terminal (or double-click the desktop shortcut):
+Once logged in via RDP, run the following command in the terminal :
 
 ```bash
 systemctl --user start docker-desktop
