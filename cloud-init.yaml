@@ -6,7 +6,7 @@ runcmd:
   # ---- Base GUI + RDP ----
   - apt update
   - apt install -y xfce4 xfce4-goodies xrdp xorgxrdp dbus-x11 x11-apps xfce4-terminal firefox git ca-certificates curl gnupg lsb-release
-  - echo xfce4-session > /home/dotstatuser/.xsession
+  - sh -c 'echo xfce4-session > /home/dotstatuser/.xsession'
   - chown dotstatuser:dotstatuser /home/dotstatuser/.xsession
   - chmod 0644 /home/dotstatuser/.xsession
   - systemctl enable xrdp
@@ -14,9 +14,9 @@ runcmd:
 
   # ---- Docker Engine repo + install ----
   - mkdir -p /etc/apt/keyrings
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - sh -c 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
   - chmod a+r /etc/apt/keyrings/docker.gpg
-  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+  - sh -c 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list'
   - apt update
   - apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   - systemctl enable docker
@@ -24,33 +24,36 @@ runcmd:
 
   # ---- Docker Desktop (.deb) ----
   - curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb" -o /tmp/docker-desktop-amd64.deb
-  - export DEBIAN_FRONTEND=noninteractive
-  - apt -y install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" /tmp/docker-desktop-amd64.deb || apt --fix-broken install -y
+  - DEBIAN_FRONTEND=noninteractive apt -y install -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold /tmp/docker-desktop-amd64.deb || apt --fix-broken install -y
 
   # ---- User permissions & lingering ----
   - usermod -aG docker,kvm dotstatuser
-  - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
+  - sh -c "echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
   - loginctl enable-linger dotstatuser
 
   # ---- Desktop shortcut: Terminal ----
   - mkdir -p /home/dotstatuser/Desktop
-  - echo "[Desktop Entry]" > /home/dotstatuser/Desktop/Terminal.desktop
-  - echo "Type=Application" >> /home/dotstatuser/Desktop/Terminal.desktop
-  - echo "Name=Terminal" >> /home/dotstatuser/Desktop/Terminal.desktop
-  - echo "Exec=xfce4-terminal" >> /home/dotstatuser/Desktop/Terminal.desktop
-  - echo "Icon=utilities-terminal" >> /home/dotstatuser/Desktop/Terminal.desktop
-  - echo "Terminal=false" >> /home/dotstatuser/Desktop/Terminal.desktop
+  - sh -c 'cat > /home/dotstatuser/Desktop/Terminal.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=Terminal
+Exec=xfce4-terminal
+Icon=utilities-terminal
+Terminal=false
+EOF'
   - chmod +x /home/dotstatuser/Desktop/Terminal.desktop
   - chown dotstatuser:dotstatuser /home/dotstatuser/Desktop/Terminal.desktop
 
   # ---- Desktop shortcut: Docker Desktop (manual start as per README) ----
-  - echo "[Desktop Entry]" > /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Type=Application" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Name=Docker Desktop" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Comment=Start Docker Desktop GUI" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Exec=systemctl --user start docker-desktop" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Icon=docker" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
-  - echo "Terminal=false" >> /home/dotstatuser/Desktop/Docker-Desktop.desktop
+  - sh -c 'cat > /home/dotstatuser/Desktop/Docker-Desktop.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=Docker Desktop
+Comment=Start Docker Desktop GUI
+Exec=systemctl --user start docker-desktop
+Icon=docker
+Terminal=false
+EOF'
   - chmod +x /home/dotstatuser/Desktop/Docker-Desktop.desktop
   - chown dotstatuser:dotstatuser /home/dotstatuser/Desktop/Docker-Desktop.desktop
 
@@ -60,4 +63,4 @@ runcmd:
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatesuite
 
   # ---- Log note ----
-  - echo 'Setup complete. RDP to the VM, open Terminal, and run: systemctl --user start docker-desktop' > /var/log/dotstatsuite-setup.log
+  - sh -c "echo 'Setup complete. RDP to the VM, open Terminal, and run: systemctl --user start docker-desktop' > /var/log/dotstatsuite-setup.log"
