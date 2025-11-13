@@ -1,16 +1,17 @@
 #cloud-config
+---
 package_update: true
 package_upgrade: true
 
 write_files:
-  # Make XFCE the session for the user
+  # XFCE session for the user
   - path: /home/dotstatuser/.xsession
     owner: dotstatuser:dotstatuser
     permissions: '0644'
     content: |
       xfce4-session
 
-  # Desktop shortcut: Terminal
+  # Terminal shortcut
   - path: /home/dotstatuser/Desktop/Terminal.desktop
     owner: dotstatuser:dotstatuser
     permissions: '0755'
@@ -22,7 +23,7 @@ write_files:
       Icon=utilities-terminal
       Terminal=false
 
-  # Desktop shortcut: Docker Desktop (manual start as per README)
+  # Docker Desktop shortcut (manual start)
   - path: /home/dotstatuser/Desktop/Docker-Desktop.desktop
     owner: dotstatuser:dotstatuser
     permissions: '0755'
@@ -35,7 +36,14 @@ write_files:
       Icon=docker
       Terminal=false
 
-  # Final note (no colons in YAML parsing problems since this is write_files)
+  # Docker APT source file (avoid long echo line)
+  - path: /etc/apt/sources.list.d/docker.list
+    permissions: '0644'
+    content: |
+      deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] \
+      https://download.docker.com/linux/ubuntu jammy stable
+
+  # Final note
   - path: /var/log/dotstatsuite-setup.log
     permissions: '0644'
     content: |
@@ -45,30 +53,46 @@ write_files:
 runcmd:
   # ---- Base GUI + RDP ----
   - apt update
-  - apt install -y xfce4 xfce4-goodies xrdp xorgxrdp dbus-x11 x11-apps xfce4-terminal firefox git ca-certificates curl gnupg lsb-release
+  - >
+    apt install -y xfce4 xfce4-goodies xrdp xorgxrdp dbus-x11 x11-apps
+    xfce4-terminal firefox git ca-certificates curl gnupg lsb-release
   - systemctl enable xrdp
   - systemctl restart xrdp
 
   # ---- Docker Engine repo + install ----
   - mkdir -p /etc/apt/keyrings
-  - bash -lc 'curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg'
+  - >
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   - chmod a+r /etc/apt/keyrings/docker.gpg
-  - bash -lc 'echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list'
   - apt update
-  - apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - >
+    apt install -y docker-ce docker-ce-cli containerd.io
+    docker-buildx-plugin docker-compose-plugin
   - systemctl enable docker
   - systemctl start docker
 
   # ---- Docker Desktop (.deb) ----
-  - curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb" -o /tmp/docker-desktop-amd64.deb
-  - DEBIAN_FRONTEND=noninteractive apt -y install -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold /tmp/docker-desktop-amd64.deb || apt --fix-broken install -y
+  - >
+    curl -L
+    "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb"
+    -o /tmp/docker-desktop-amd64.deb
+  - >-
+    DEBIAN_FRONTEND=noninteractive apt -y install
+    -o Dpkg::Options::=--force-confdef
+    -o Dpkg::Options::=--force-confold
+    /tmp/docker-desktop-amd64.deb
+    || apt --fix-broken install -y
 
   # ---- User permissions & lingering ----
   - usermod -aG docker,kvm dotstatuser
-  - bash -lc "echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
+  - >
+    bash -lc "echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
   - loginctl enable-linger dotstatuser
 
   # ---- Clone .Stat Suite ----
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
-  - find /home/dotstatuser/dotstatesuite -type f -name '*.sh' -exec chmod +x {} +
+  - >
+    find /home/dotstatuser/dotstatesuite -type f -name '*.sh'
+    -exec chmod +x {} +
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatesuite
