@@ -25,7 +25,7 @@ runcmd:
   - sudo apt update
 
   # Install Docker Engine components first
-  # - sudo apt install -yq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - sudo apt install -yq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
   # Download and install Docker Desktop
   - sudo curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb" -o /tmp/docker-desktop-amd64.deb
