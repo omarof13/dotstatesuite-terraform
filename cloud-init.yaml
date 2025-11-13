@@ -4,13 +4,6 @@ package_upgrade: true
 
 runcmd:
   # ---------------------------------------------------------
-  # Configure user permissions (Docker + KVM) FIRST
-  # ---------------------------------------------------------
-  - usermod -aG docker,kvm dotstatuser
-  - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
-  - loginctl enable-linger dotstatuser
-
-  # ---------------------------------------------------------
   # Base environment + XRDP + XFCE desktop
   # ---------------------------------------------------------
   - apt update
@@ -22,7 +15,7 @@ runcmd:
   - systemctl start xrdp
 
   # ---------------------------------------------------------
-  # Install Docker Engine + Docker Desktop (non-interactive)
+  # Install Docker Engine + Docker Desktop
   # ---------------------------------------------------------
   - mkdir -p /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -36,6 +29,14 @@ runcmd:
   - apt -yq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" /tmp/docker-desktop-amd64.deb || apt --fix-broken install -yq
   - systemctl enable docker
   - systemctl start docker
+
+  # ---------------------------------------------------------
+  # Configure user permissions (Docker + KVM) AFTER groups exist
+  # ---------------------------------------------------------
+  - 'if getent group docker >/dev/null 2>&1; then usermod -aG docker dotstatuser; fi'
+  - 'if getent group kvm >/dev/null 2>&1; then usermod -aG kvm dotstatuser; fi'
+  - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
+  - loginctl enable-linger dotstatuser
 
   # ---------------------------------------------------------
   # Clone .Stat Suite repository
