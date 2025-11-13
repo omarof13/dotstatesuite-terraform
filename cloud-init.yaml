@@ -1,98 +1,56 @@
 #cloud-config
----
 package_update: true
 package_upgrade: true
 
-write_files:
-  # XFCE session for the user
-  - path: /home/dotstatuser/.xsession
-    owner: dotstatuser:dotstatuser
-    permissions: '0644'
-    content: |
-      xfce4-session
-
-  # Terminal shortcut
-  - path: /home/dotstatuser/Desktop/Terminal.desktop
-    owner: dotstatuser:dotstatuser
-    permissions: '0755'
-    content: |
-      [Desktop Entry]
-      Type=Application
-      Name=Terminal
-      Exec=xfce4-terminal
-      Icon=utilities-terminal
-      Terminal=false
-
-  # Docker Desktop shortcut (manual start)
-  - path: /home/dotstatuser/Desktop/Docker-Desktop.desktop
-    owner: dotstatuser:dotstatuser
-    permissions: '0755'
-    content: |
-      [Desktop Entry]
-      Type=Application
-      Name=Docker Desktop
-      Comment=Start Docker Desktop GUI
-      Exec=systemctl --user start docker-desktop
-      Icon=docker
-      Terminal=false
-
-  # Docker APT source file (avoid long echo line)
-  - path: /etc/apt/sources.list.d/docker.list
-    permissions: '0644'
-    content: |
-      deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] \
-      https://download.docker.com/linux/ubuntu jammy stable
-
-  # Final note
-  - path: /var/log/dotstatsuite-setup.log
-    permissions: '0644'
-    content: |
-      Setup complete. RDP to the VM. Open Terminal and run:
-        systemctl --user start docker-desktop
-
 runcmd:
-  # ---- Base GUI + RDP ----
+  # ---------------------------------------------------------
+  # Base environment + XRDP + XFCE desktop
+  # ---------------------------------------------------------
   - apt update
-  - >
-    apt install -y xfce4 xfce4-goodies xrdp xorgxrdp dbus-x11 x11-apps
-    xfce4-terminal firefox git ca-certificates curl gnupg lsb-release
+  - apt install -y xfce4 xfce4-goodies xrdp firefox git ca-certificates curl gnupg lsb-release
+  - echo xfce4-session > /home/dotstatuser/.xsession
+  - chown dotstatuser:dotstatuser /home/dotstatuser/.xsession
+  - chmod +x /home/dotstatuser/.xsession
   - systemctl enable xrdp
-  - systemctl restart xrdp
+  - systemctl start xrdp
 
-  # ---- Docker Engine repo + install ----
-  - mkdir -p /etc/apt/keyrings
-  - >
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
-    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  - chmod a+r /etc/apt/keyrings/docker.gpg
-  - apt update
-  - >
-    apt install -y docker-ce docker-ce-cli containerd.io
-    docker-buildx-plugin docker-compose-plugin
+  # ---------------------------------------------------------
+  # Install Docker Engine + Docker Desktop (non-interactive)
+  # ---------------------------------------------------------
+  # Add official Docker repository and GPG key (new Ubuntu keyring format)
+  - sudo mkdir -p /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - sudo chmod a+r /etc/apt/keyrings/docker.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - sudo apt update
+
+  # Install Docker Engine components first
+  # - sudo apt install -yq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+  # Download and install Docker Desktop
+  - sudo curl -L "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb" -o /tmp/docker-desktop-amd64.deb
+  - export DEBIAN_FRONTEND=noninteractive
+  - sudo apt -yq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" /tmp/docker-desktop-amd64.deb || sudo apt --fix-broken install -yq
   - systemctl enable docker
   - systemctl start docker
 
-  # ---- Docker Desktop (.deb) ----
-  - >
-    curl -L
-    "https://desktop.docker.com/linux/main/amd64/docker-desktop-amd64.deb"
-    -o /tmp/docker-desktop-amd64.deb
-  - >-
-    DEBIAN_FRONTEND=noninteractive apt -y install
-    -o Dpkg::Options::=--force-confdef
-    -o Dpkg::Options::=--force-confold
-    /tmp/docker-desktop-amd64.deb
-    || apt --fix-broken install -y
-
-  # ---- User permissions & lingering ----
+  # ---------------------------------------------------------
+  # Configure user permissions (Docker + KVM)
+  # ---------------------------------------------------------
   - usermod -aG docker,kvm dotstatuser
-  - >
-    bash -lc "echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
+  - echo 'dotstatuser ALL=(ALL) NOPASSWD:ALL' | tee -a /etc/sudoers
   - loginctl enable-linger dotstatuser
 
-  # ---- Clone .Stat Suite ----
+  # ---------------------------------------------------------
+  # Clone .Stat Suite repository
+  # ---------------------------------------------------------
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
-  - >
-    find /home/dotstatuser/dotstatesuite -type f -name '*.sh'
-    -exec chmod +x {} +
+
+  # Fix permissions for all shell scripts recursively
+  - find /home/dotstatuser/dotstatesuite -type f -name "*.sh" -exec chmod +x {} +
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatesuite
+
+  # ---------------------------------------------------------
+  # Final note for user
+  # ---------------------------------------------------------
+  - echo 'Systemd service creation skipped. Start /home/dotstatuser/dotstatesuite/demo/start.sh manually as dotstatuser when needed.' > /var/log/dotstatsuite-setup.log
