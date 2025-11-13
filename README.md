@@ -113,7 +113,6 @@ After Terraform completes, please wait approximately **5 minutes** for the syste
    - **Password:** `ChangeMe123!`
 
 Inside the XFCE desktop environment, you’ll find:
-- A **Docker Desktop** shortcut on the Desktop  
 - **Firefox** for browsing  
 - **Terminal** ready for Docker and Git commands
 
@@ -121,11 +120,15 @@ Inside the XFCE desktop environment, you’ll find:
 
 ## 🐳 Starting Docker Desktop GUI
 
-Once logged in via RDP, run the following command in the terminal :
+Once logged in via RDP, run the following command in the terminal:
 
 ```bash
 systemctl --user start docker-desktop
 ```
+
+On the **first launch**, Docker Desktop will:
+- Prompt you to **accept the license agreement** — click **Accept**.  
+- Ask to **sign in or create a Docker account** — you can **skip this step** by closing the dialog.
 
 After a few seconds, the **Docker Desktop whale icon** will appear in the XFCE taskbar.  
 You can then manage containers from the Docker Desktop GUI or through the CLI.
