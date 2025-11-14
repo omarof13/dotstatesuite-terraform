@@ -169,6 +169,19 @@ You can then manage containers from the Docker Desktop GUI or through the CLI.
 
 ---
 
+## ⚠️ Important – Configure Docker Desktop Memory (4 GB)
+
+Once Docker Desktop is running, you **must configure the memory limit to at least 4 GB**, otherwise the **MSSQL container will not start correctly**.
+
+1. Open **Docker Desktop**.
+2. Go to **Settings → Resources**.
+3. Set **Memory** to **4 GB** (or higher).
+4. Click **Apply & Restart** if prompted.
+
+If this step is skipped, the SQL Server container may fail to start due to insufficient memory.
+
+---
+
 ## 📊 Running the .Stat Suite Demo
 
 Navigate to the cloned demo directory:
