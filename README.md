@@ -175,7 +175,7 @@ Once Docker Desktop is running, you **must configure the memory limit to at leas
 
 1. Open **Docker Desktop**.
 2. Go to **Settings → Resources**.
-3. Set **Memory** to **4 GB** (or higher).
+3. Set **Memory** to **4 GB**.
 4. Click **Apply & Restart** if prompted.
 
 If this step is skipped, the SQL Server container may fail to start due to insufficient memory.
