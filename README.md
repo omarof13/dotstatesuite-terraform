@@ -187,7 +187,7 @@ This command starts all required services and initializes the local `.Stat Suite
 After the initial startup completes, enter the **SFS (Structure File Store)** container to initialize the schema index:
 
 ```bash
-docker exec -it sfs bash
+docker exec -it sfs sh
 yarn dist:schema
 exit
 ```
