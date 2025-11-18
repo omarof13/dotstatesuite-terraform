@@ -31,7 +31,7 @@ runcmd:
   - systemctl start docker
 
   # ---------------------------------------------------------
-  # Configure user permissions (Docker + KVM) AFTER groups exist
+  # Configure user permissions (Docker + KVM)
   # ---------------------------------------------------------
   - 'if getent group docker >/dev/null 2>&1; then usermod -aG docker dotstatuser; fi'
   - 'if getent group kvm >/dev/null 2>&1; then usermod -aG kvm dotstatuser; fi'
@@ -44,6 +44,11 @@ runcmd:
   - su - dotstatuser -c "git clone https://github.com/omarof13/dotstatesuite.git"
   - find /home/dotstatuser/dotstatesuite -type f -name "*.sh" -exec chmod +x {} +
   - chown -R dotstatuser:dotstatuser /home/dotstatuser/dotstatesuite
+
+  # ---------------------------------------------------------
+  # Fix host.docker.internal resolution for browsers
+  # ---------------------------------------------------------
+  - "grep -qxF '127.0.0.1 host.docker.internal' /etc/hosts || echo '127.0.0.1 host.docker.internal' >> /etc/hosts"
 
   # ---------------------------------------------------------
   # Final note for user
